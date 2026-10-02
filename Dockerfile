@@ -11,8 +11,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # INDI PPA (Jasem Mutlaq): indi-bin has the core drivers and indiserver; indi-3rdparty-drivers
 # bundles all vendor drivers (ZWO, QHY, ...). Since 2026-08 the PPA only publishes builds
 # for Ubuntu 26.04, so don't move the base image back to an older release.
-# PHD2 comes from a separate PPA. --break-system-packages: Ubuntu 26.04 enforces PEP 668,
-# and nothing else in this image uses the system Python.
+# PHD2 comes from a separate PPA. INDI Web Manager goes in its own venv because Ubuntu
+# 26.04 blocks pip from replacing apt-managed Python packages (PEP 668).
 RUN apt-get update \
     && apt-get install -y software-properties-common gpg-agent ca-certificates \
     && add-apt-repository -y ppa:mutlaqja/ppa \
@@ -23,9 +23,11 @@ RUN apt-get update \
         indi-3rdparty-drivers \
         libusb-1.0-0 \
         udev \
-        python3-pip \
+        python3-venv \
     && if [ "$INSTALL_PHD2" = "true" ]; then apt-get install -y phd2 xvfb; fi \
-    && pip3 install --no-cache-dir --break-system-packages indiweb \
+    && python3 -m venv /opt/indiweb \
+    && /opt/indiweb/bin/pip install --no-cache-dir indiweb \
+    && ln -s /opt/indiweb/bin/indi-web /usr/local/bin/indi-web \
     && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
