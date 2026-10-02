@@ -1,0 +1,25 @@
+services:
+  indi-controller:
+    build:
+      context: .
+      args:
+        INSTALL_PHD2: ${INSTALL_PHD2:-true}
+    image: indi-controller:latest
+    container_name: indi-controller
+    restart: unless-stopped
+    privileged: true            # USB hotplug access to cameras, focusers, serial mounts
+    volumes:
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
+      - ./config:/config        # INDI driver configs, Web Manager profiles, PHD2 settings
+    ports:
+      - "${INDI_HOST_PORT:-7624}:7624"         # INDI server (Ekos connects here)
+      - "${INDI_WEB_HOST_PORT:-8624}:8624"     # INDI Web Manager (webmanager mode only)
+      - "${PHD2_HOST_PORT:-4400}:4400"         # PHD2 event server
+    environment:
+      - INDI_MODE=${INDI_MODE:-static}
+      - INDI_DRIVERS=${INDI_DRIVERS:-indi_simulator_telescope indi_simulator_ccd indi_simulator_focus}
+      - INDI_VERBOSE=${INDI_VERBOSE:-false}
+      - INDI_AUTOCONNECT=${INDI_AUTOCONNECT:-true}
+      - INDI_AUTOCONNECT_TIMEOUT=${INDI_AUTOCONNECT_TIMEOUT:-300}
+      - ENABLE_PHD2=${ENABLE_PHD2:-true}

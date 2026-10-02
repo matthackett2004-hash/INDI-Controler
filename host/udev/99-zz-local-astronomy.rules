@@ -1,0 +1,16 @@
+# Local device symlinks. Edit for the equipment on this machine.
+# Vendor rules (permissions, USB buffer size) are installed separately from the image.
+# Find IDs with: lsusb   (format is idVendor:idProduct)
+
+# ZWO ASI183MC (main imaging camera)
+SUBSYSTEM=="usb", ATTR{idVendor}=="03c3", ATTR{idProduct}=="183a", MODE="0666", SYMLINK+="zwo_main"
+
+# ZWO ASI220 Mini (guide camera)
+SUBSYSTEM=="usb", ATTR{idVendor}=="03c3", ATTR{idProduct}=="0220", MODE="0666", SYMLINK+="zwo_guide"
+
+# ZWO EAF (focuser)
+SUBSYSTEM=="usb", ATTR{idVendor}=="03c3", ATTR{idProduct}=="1f10", MODE="0666", SYMLINK+="zwo_eaf"
+
+# Celestron mount via FTDI FT232 USB-serial cable -> /dev/cgem_mount
+# Set the mount driver's port to /dev/cgem_mount in Ekos so it survives replugging.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666", SYMLINK+="cgem_mount"
